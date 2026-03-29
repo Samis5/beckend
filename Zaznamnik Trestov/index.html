@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<title>Register trestov</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#f0f0f0;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+}
+
+#search{
+    display:block;
+    margin:20px auto;
+    padding:10px;
+    width:300px;
+    border-radius:8px;
+}
+
+.zaznam{
+    background:white;
+    max-width:600px;
+    margin:20px auto;
+    padding:20px;
+    border-left:6px solid red;
+    box-shadow:0 5px 10px rgba(0,0,0,0.2);
+}
+
+img{
+    width:100px;
+    border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📄 REGISTER TRESTOV</h1>
+
+<input id="search" placeholder="Hľadať osobu...">
+
+<div id="container"></div>
+
+<script>
+const container = document.getElementById("container")
+const search = document.getElementById("search")
+
+let osoby = []
+
+const zlociny = ["Krádež","Podvod","Vlámanie","Hackovanie","Drogy","Útok"]
+const tresty = ["1 rok","3 roky","5 rokov","10 rokov","Doživotie"]
+
+async function nacitaj(){
+    try{
+        const res = await fetch("https://samis5.github.io/beckend/data.json")
+        const data = await res.json()
+
+        osoby = data.students.map(o => ({
+            ...o,
+            zlocin: zlociny[Math.floor(Math.random()*zlociny.length)],
+            trest: tresty[Math.floor(Math.random()*tresty.length)]
+        }))
+
+        zobraz(osoby)
+    }catch(err){
+        container.innerHTML = "<p>❌ Nepodarilo sa načítať dáta</p>"
+        console.error(err)
+    }
+}
+
+function zobraz(data){
+    container.innerHTML = ""
+
+    data.forEach(o => {
+        const div = document.createElement("div")
+        div.classList.add("zaznam")
+
+        div.innerHTML = `
+            <h2>${o.name}</h2>
+            <p><strong>Vek:</strong> ${o.age}</p>
+            <p><strong>Výška:</strong> ${o.vyska} cm</p>
+            <p><strong>Trestný čin:</strong> ${o.zlocin}</p>
+            <p><strong>Trest:</strong> ${o.trest}</p>
+            <img src="${o.image}">
+        `
+
+        container.appendChild(div)
+    })
+}
+
+search.addEventListener("input", ()=>{
+    const text = search.value.toLowerCase()
+
+    const filt = osoby.filter(o =>
+        o.name.toLowerCase().includes(text)
+    )
+
+    zobraz(filt)
+})
+
+nacitaj()
+</script>
+
+</body>
+</html>
